@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>aidict - AI辞書</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body
+    data-default-host="{{ default_ollama_host }}"
+    data-default-model="{{ default_model }}"
+>
+    <header class="topbar">
+        <div class="topbar-left">
+            <button
+                type="button"
+                id="sidebar-toggle"
+                class="icon-btn mobile-only"
+                aria-label="登録語一覧を開く"
+            >
+                ☰
+            </button>
+            <h1 class="brand">aidict</h1>
+            <span class="brand-sub">AI辞書</span>
+        </div>
+
+        <div class="settings-bar">
+            <label class="setting-field">
+                <span>Ollama URL</span>
+                <input
+                    type="url"
+                    id="ollama-host"
+                    placeholder="http://localhost:11434"
+                    spellcheck="false"
+                />
+            </label>
+
+            <label class="setting-field">
+                <span>モデル</span>
+                <select id="model-select" aria-label="使用するモデル"></select>
+            </label>
+
+            <button type="button" id="refresh-models-btn" class="btn btn-secondary">
+                モデル取得
+            </button>
+            <span id="model-status" class="model-status" aria-live="polite"></span>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
+
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>登録済みワード</h2>
+                <span id="word-count" class="badge">0</span>
+            </div>
+            <div class="sidebar-search">
+                <input
+                    type="search"
+                    id="sidebar-filter"
+                    placeholder="登録語・漢字・意味で絞り込み..."
+                    autocomplete="off"
+                />
+            </div>
+            <ul id="word-list" class="word-list"></ul>
+        </aside>
+
+        <main class="main-content">
+            <section class="search-section">
+                <form id="search-form" class="search-form">
+                    <input
+                        type="text"
+                        id="word-input"
+                        placeholder="カタカナ・ひらがなで検索（例: シンコウ / しんこう）"
+                        autocomplete="off"
+                        required
+                    />
+                    <button type="submit" id="search-btn" class="btn btn-primary">
+                        検索 / 生成
+                    </button>
+                </form>
+                <p class="search-hint">
+                    キャッシュにあれば即表示し、未登録の語は選択中のモデルで自動生成します。
+                </p>
+            </section>
+
+            <div id="status-banner" class="status-banner hidden" role="status"></div>
+
+            <section id="viewer" class="viewer">
+                <div class="empty-state">
+                    <p>上の検索ボックスに語を入力するか、左の一覧から語を選んでください。</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 手動編集モーダル -->
+    <div id="edit-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="edit-modal-title">エントリを編集</h2>
+                <button type="button" id="edit-close-btn" class="icon-btn" aria-label="閉じる">✕</button>
+            </div>
+            <form id="edit-form" class="modal-body">
+                <label class="form-group">
+                    <span>カタカナ読み</span>
+                    <input type="text" id="edit-katakana" required />
+                </label>
+
+                <div class="edit-section-header">
+                    <h3>表記一覧</h3>
+                    <button type="button" id="add-form-btn" class="btn btn-secondary btn-sm">
+                        ＋ 表記を追加
+                    </button>
+                </div>
+                <div id="edit-written-forms"></div>
+
+                <label class="form-group">
+                    <span>補足（1行につき1項目）</span>
+                    <textarea id="edit-notes" rows="4" placeholder="語源や使い分けなどの補足"></textarea>
+                </label>
+
+                <div class="modal-footer">
+                    <button type="button" id="edit-cancel-btn" class="btn btn-secondary">キャンセル</button>
+                    <button type="submit" id="edit-save-btn" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>
